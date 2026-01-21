@@ -1,6 +1,6 @@
 use anyhow::Result;
 use rand::{SeedableRng, rngs::StdRng};
-use std::path::PathBuf;
+use std::io::Write;
 
 use burn::{
     optim::AdamWConfig,
@@ -126,6 +126,8 @@ impl<B: AutodiffBackendTrait> TrainStep<TrainBatch<B>, TrainOutputItem<B>> for G
         let device = logits2.device();
         let loss = burn::nn::loss::CrossEntropyLoss::new(None, &device)
             .forward(logits2.clone(), targets.clone());
+        let loss_val = loss.clone().into_data().value[0].elem::<f32>();
+        log_loss_sample(loss_val);
         let grads = loss.backward();
         let output = ClassificationOutput::new(loss.clone(), logits2, targets);
         TrainOutput::new(self, grads, TrainOutputItem { output })
@@ -251,44 +253,13 @@ impl MetricLogger for MultiMetricLogger {
     }
 }
 
-struct LossCaptureLogger {
-    path: PathBuf,
-    first_loss: Option<f64>,
-    last_loss: Option<f64>,
-}
-
-impl LossCaptureLogger {
-    fn new(path: PathBuf) -> Self {
-        Self { path, first_loss: None, last_loss: None }
+fn log_loss_sample(value: f32) {
+    let Ok(path) = std::env::var("BOOKHEAD_LOSS_LOG") else { return };
+    if let Some(parent) = std::path::Path::new(&path).parent() {
+        let _ = std::fs::create_dir_all(parent);
     }
-
-    fn write(&self) {
-        if let (Some(first), Some(last)) = (self.first_loss, self.last_loss) {
-            let content = format!("first={first}\nlast={last}\n");
-            let _ = std::fs::write(&self.path, content);
-        }
-    }
-}
-
-impl MetricLogger for LossCaptureLogger {
-    fn log(&mut self, item: &MetricEntry) {
-        if item.name != "Loss" {
-            return;
-        }
-        if let Ok(val) = item.serialize.parse::<f64>() {
-            if self.first_loss.is_none() {
-                self.first_loss = Some(val);
-            }
-            self.last_loss = Some(val);
-        }
-    }
-
-    fn end_epoch(&mut self, _epoch: usize) {
-        self.write();
-    }
-
-    fn read_numeric(&mut self, _name: &str, _epoch: usize) -> Result<Vec<burn::train::metric::NumericEntry>, String> {
-        Ok(Vec::new())
+    if let Ok(mut file) = std::fs::OpenOptions::new().create(true).append(true).open(path) {
+        let _ = writeln!(file, "{value}");
     }
 }
 
@@ -520,10 +491,6 @@ where
 
     let mut train_loggers: Vec<Box<dyn MetricLogger>> = Vec::new();
     let mut valid_loggers: Vec<Box<dyn MetricLogger>> = Vec::new();
-
-    if let Ok(path) = std::env::var("BOOKHEAD_LOSS_LOG") {
-        train_loggers.push(Box::new(LossCaptureLogger::new(PathBuf::from(path))));
-    }
 
     if let Some(cfg) = &early_stop {
         if cfg.use_validation {

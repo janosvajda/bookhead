@@ -20,9 +20,12 @@ use crate::memory::{
 
 type BackendImpl = burn_ndarray::NdArray<f32>;
 
+// Softmax turns raw scores into probabilities that sum to 1.
+// It makes higher scores more likely while keeping all values in [0, 1].
 // Compute a softmax distribution with optional temperature scaling.
 fn softmax_vec(logits: &[f32], temperature: f64) -> Vec<f32> {
     if temperature <= 0.0 {
+        // Temperature <= 0 forces greedy selection as a one-hot distribution.
         let mut out = vec![0.0; logits.len()];
         let mut best = 0usize;
         for (i, &v) in logits.iter().enumerate() {
@@ -33,13 +36,16 @@ fn softmax_vec(logits: &[f32], temperature: f64) -> Vec<f32> {
     }
     let temp = temperature as f32;
     let max = logits.iter().cloned().fold(f32::NEG_INFINITY, f32::max);
+    // Subtract max for numerical stability.
     let exps: Vec<f32> = logits.iter().map(|&x| ((x - max) / temp).exp()).collect();
     let sum: f32 = exps.iter().sum::<f32>().max(1e-8);
     exps.iter().map(|x| x / sum).collect()
 }
 
-// Sample an index from the top-k probabilities.
+
+// Sample a token id from the top-k slice of the distribution.
 fn sample_top_k(probs: &[f32], k: usize, rng: &mut impl Rng) -> usize {
+    // Sort indices by probability (descending) and sample within the top-k mass.
     let mut idxs: Vec<usize> = (0..probs.len()).collect();
     idxs.sort_by(|&a, &b| probs[b].partial_cmp(&probs[a]).unwrap());
     let k = k.min(idxs.len());
@@ -55,14 +61,14 @@ fn sample_top_k(probs: &[f32], k: usize, rng: &mut impl Rng) -> usize {
     top[k-1]
 }
 
-// Autoregressively generate tokens from a prompt.
-// Autoregressively generate tokens from a prompt.
+// Autoregressively generate tokens from a prompt using greedy or top-k sampling.
 fn generate(model: &Gpt<BackendImpl>, cfg: &crate::config::ModelConfig, prompt: &str, max_new_tokens: usize, temperature: f64, top_k: usize) -> String {
     let device = burn_ndarray::NdArrayDevice::default();
     let mut ids = ByteTokenizer::encode(prompt);
     let mut rng = rand::thread_rng();
 
     for _ in 0..max_new_tokens {
+        // Use a fixed-size context window with left padding for short prompts.
         let start = ids.len().saturating_sub(cfg.seq_len);
         let window = &ids[start..];
 
@@ -70,6 +76,7 @@ fn generate(model: &Gpt<BackendImpl>, cfg: &crate::config::ModelConfig, prompt: 
         let offset = cfg.seq_len - window.len();
         input[offset..].copy_from_slice(window);
 
+        // Run the model on the full window, then take the last token logits.
         let x = Tensor::<BackendImpl, 2, Int>::from_data(
             Data::new(
                 input
@@ -86,6 +93,7 @@ fn generate(model: &Gpt<BackendImpl>, cfg: &crate::config::ModelConfig, prompt: 
 
         let logits_vec = logits_last.into_data().value;
         let probs = softmax_vec(&logits_vec, temperature);
+        // top_k == 0 means pure greedy; otherwise sample within the top-k slice.
         let next = if top_k == 0 {
             probs.iter().enumerate().max_by(|a,b| a.1.partial_cmp(b.1).unwrap()).map(|(i,_)| i).unwrap_or(0)
         } else {
@@ -98,12 +106,7 @@ fn generate(model: &Gpt<BackendImpl>, cfg: &crate::config::ModelConfig, prompt: 
     ByteTokenizer::decode(&ids)
 }
 
-/// Chat with optional long-term memory.
-/// Short-term memory = model context window (cfg.seq_len bytes).
-/// Long-term memory = episodic chunk store + semantic notes store.
-/// We retrieve relevant memories and inject them into the prompt (working memory).
-// Chat loop that optionally augments the prompt with long-term memory.
-// Chat loop that optionally augments the prompt with long-term memory.
+/// Chat with optional long-term memory (episodic chunks + semantic notes).
 pub fn run_chat_with_memory(
     ckpt_dir: &str,
     memory_dir: Option<&str>,
@@ -126,8 +129,7 @@ pub fn run_chat_with_memory(
     };
     let chat_settings = settings.as_ref().and_then(|s| s.chat.clone());
 
-    // NOTE: model weight re-loading is still TODO (see README).
-    // This creates a model with the saved config so the program builds and runs.
+    // Load latest checkpoint if available; otherwise use a fresh model config.
     let mut model: Gpt<BackendImpl> = Gpt::new(&cfg, &device);
     if let Some(path) = latest_checkpoint_path(ckpt_dir) {
         let recorder = DefaultRecorder::new();
@@ -143,7 +145,7 @@ pub fn run_chat_with_memory(
 
     if let Some(memdir) = memory_dir {
         let store = MemoryStore::load(memdir)?;
-        // read embedder config (hash dim) if present, else default
+        // Build a local embedder for retrieval; dim is currently fixed.
         let dim = 2048usize;
         let embedder = HashEmbedder::new(dim);
         let q_emb = embedder.embed(&final_prompt);
@@ -164,10 +166,12 @@ pub fn run_chat_with_memory(
         embedder_opt = Some(embedder);
     }
 
+    // Apply settings/presets that may override generation params.
     let (temperature, top_k, max_new_tokens, system_prompt) =
         apply_chat_settings(temperature, top_k, max_new_tokens, chat_settings);
 
     if repl {
+        // Interactive loop keeps history and optionally updates semantic memory.
         run_repl(
             &model,
             &cfg,
@@ -338,6 +342,7 @@ fn run_repl(
             let epi = top_k_chunks(&q_emb, &store.chunks, k_episodic);
             let sem = top_k_notes(&q_emb, &store.notes, k_semantic);
 
+            // Inject retrieved memories into the prompt before generation.
             let episodic_lines: Vec<String> = epi.iter().map(|(c, _s)| {
                 sources.push(c.id.clone());
                 format!("[{}:{}] {}", c.book, c.offset, trim_text(&c.text, 60))
@@ -382,4 +387,73 @@ fn run_repl(
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{softmax_vec, sample_top_k, trim_text, latest_checkpoint_path, BackendImpl};
+    use rand::{SeedableRng, rngs::StdRng};
+    use std::time::{SystemTime, UNIX_EPOCH};
+    use std::{fs, path::PathBuf};
+    use burn::record::{DefaultRecorder, FileRecorder};
+
+    fn make_temp_dir() -> PathBuf {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let dir = std::env::temp_dir().join(format!("bookhead_infer_{nanos}"));
+        fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    #[test]
+    fn softmax_greedy_when_temp_zero() {
+        let probs = softmax_vec(&[0.1, 2.0, -1.0], 0.0);
+        assert_eq!(probs.len(), 3);
+        assert_eq!(probs[0], 0.0);
+        assert_eq!(probs[1], 1.0);
+        assert_eq!(probs[2], 0.0);
+    }
+
+    #[test]
+    fn softmax_sums_to_one() {
+        let probs = softmax_vec(&[1.0, 2.0, 3.0], 1.0);
+        let sum: f32 = probs.iter().sum();
+        assert!((sum - 1.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn sample_top_k_respects_k() {
+        let probs = vec![0.9, 0.05, 0.05];
+        let mut rng = StdRng::seed_from_u64(1);
+        for _ in 0..50 {
+            let idx = sample_top_k(&probs, 1, &mut rng);
+            assert_eq!(idx, 0);
+        }
+    }
+
+    #[test]
+    fn trim_text_limits_words() {
+        let text = "one two three four five";
+        assert_eq!(trim_text(text, 3), "one two three");
+        assert_eq!(trim_text(text, 10), text);
+    }
+
+    #[test]
+    fn latest_checkpoint_picks_highest_epoch() {
+        let dir = make_temp_dir();
+        let ckpt_dir = dir.join("checkpoint");
+        fs::create_dir_all(&ckpt_dir).unwrap();
+        let ext = <DefaultRecorder as FileRecorder<BackendImpl>>::file_extension();
+        fs::write(ckpt_dir.join(format!("model-1.{ext}")), "a").unwrap();
+        fs::write(ckpt_dir.join(format!("model-10.{ext}")), "b").unwrap();
+        fs::write(ckpt_dir.join(format!("model-2.{ext}")), "c").unwrap();
+        fs::write(ckpt_dir.join("ignore.txt"), "x").unwrap();
+
+        let got = latest_checkpoint_path(dir.to_str().unwrap()).unwrap();
+        assert_eq!(got.file_name().unwrap().to_string_lossy(), format!("model-10.{ext}"));
+
+        let _ = fs::remove_dir_all(dir);
+    }
 }
