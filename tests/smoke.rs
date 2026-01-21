@@ -82,7 +82,6 @@ fn train_and_chat_smoke() {
 }
 
 #[test]
-#[ignore]
 fn loss_decreases_short_run() {
     let bin = resolve_bin();
     let books_dir = make_temp_dir("books_loss");
@@ -114,11 +113,11 @@ fn loss_decreases_short_run() {
     let mut first = None;
     let mut last = None;
     for line in content.lines() {
-        if let Some(v) = line.strip_prefix("first=") {
-            first = v.parse::<f64>().ok();
-        }
-        if let Some(v) = line.strip_prefix("last=") {
-            last = v.parse::<f64>().ok();
+        if let Ok(v) = line.trim().parse::<f64>() {
+            if first.is_none() {
+                first = Some(v);
+            }
+            last = Some(v);
         }
     }
     let first = first.expect("first loss");
