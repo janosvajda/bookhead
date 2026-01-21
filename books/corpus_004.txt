@@ -1,0 +1,141 @@
+Scene: Noah talks with Emi (partner) in the kitchen. The weather is humid.
+Emi: Hey, how are you feeling today?
+Noah: Honestly, I’m stressed. I keep thinking about news.
+Emi: Thanks for telling me.
+Emi: What’s the hardest part right now?
+Noah: I think I need time alone. Everything feels a bit loud in my head.
+Emi: Could you lower the bar for today and focus on the next 30 minutes?
+Noah: Yeah. That feels doable. Thanks.
+Emi: We’ll figure it out.
+
+Scene: Theo talks with Alex (sibling) in the gym. The weather is humid.
+Alex: Hey, how are you feeling today?
+Theo: Honestly, I’m calm. I keep thinking about family plans.
+Alex: Want to talk it through, or just vent?
+Alex: Do you want advice, or just company?
+Theo: I think I need a snack. Everything feels a bit loud in my head.
+Alex: Could you lower the bar for today and focus on the next 30 minutes?
+Theo: Yeah. That feels doable. Thanks.
+Alex: We’ll figure it out.
+
+Scene: Theo talks with Taylor (neighbor) in the office. The weather is windy.
+Taylor: Hey, how are you feeling today?
+Theo: Honestly, I’m a bit anxious. I keep thinking about motivation.
+Taylor: I hear you.
+Taylor: Is there one small thing that would help?
+Theo: I mostly need to vent. I’m not sure what to do first, and it’s draining.
+Taylor: Could you lower the bar for today and focus on the next 30 minutes?
+Theo: Yeah. That feels doable. Thanks.
+Taylor: Be gentle with yourself tonight.
+
+Scene: Casey talks with Emi (roommate) in the pharmacy. The weather is foggy.
+Emi: Hey, how are you feeling today?
+Casey: Honestly, I’m calm. I keep thinking about motivation.
+Emi: Thanks for telling me.
+Emi: What’s the hardest part right now?
+Casey: I think I need a reset. Everything feels a bit loud in my head.
+Emi: Would it help to write down the top two things and ignore the rest for now?
+Casey: Yeah. That feels doable. Thanks.
+Emi: I’m here.
+
+Scene: Morgan talks with Jamie (sibling) in the library. The weather is humid.
+Jamie: Hey, how are you feeling today?
+Morgan: Honestly, I’m tired. I keep thinking about money.
+Jamie: We can take it one step at a time.
+Jamie: Do you need to rest, or do you need momentum?
+Morgan: I think I need a snack. Everything feels a bit loud in my head.
+Jamie: Maybe try turning off notifications and then pick one tiny task.
+Morgan: Yeah. That feels doable. Thanks.
+Jamie: Be gentle with yourself tonight.
+
+Scene: Taylor talks with Casey (partner) in the pharmacy. The weather is grey.
+Casey: Hey, how are you feeling today?
+Taylor: Honestly, I’m overwhelmed. I keep thinking about family plans.
+Casey: Thanks for telling me.
+Casey: What’s the hardest part right now?
+Taylor: I think I need some quiet. Everything feels a bit loud in my head.
+Casey: Could you take five minutes to breathe and then decide what matters most?
+Taylor: Yeah. That feels doable. Thanks.
+Casey: Be gentle with yourself tonight.
+
+Scene: Emi talks with Jamie (friend) in the library. The weather is clear.
+Jamie: Hey, how are you feeling today?
+Emi: Honestly, I’m tired. I keep thinking about family plans.
+Jamie: It’s okay if today is just okay.
+Jamie: What’s the hardest part right now?
+Emi: I think I need a reset. Everything feels a bit loud in my head.
+Jamie: Could you take five minutes to breathe and then decide what matters most?
+Emi: Yeah. That feels doable. Thanks.
+Jamie: I’m here.
+
+Scene: Sam talks with Jamie (coworker) in the train platform. The weather is bright.
+Jamie: Hey, how are you feeling today?
+Sam: Honestly, I’m flat. I keep thinking about family plans.
+Jamie: It’s okay if today is just okay.
+Jamie: What’s the hardest part right now?
+Sam: I mostly need to vent. I’m not sure what to do first, and it’s draining.
+Jamie: Maybe try taking a short walk and then pick one tiny task.
+Sam: Yeah. That feels doable. Thanks.
+Jamie: I’m here.
+
+Scene: Avery talks with Casey (friend) in the park. The weather is windy.
+Casey: Hey, how are you feeling today?
+Avery: Honestly, I’m uncertain. I keep thinking about diet.
+Casey: You don’t have to carry it alone.
+Casey: Do you need to rest, or do you need momentum?
+Avery: I mostly need to vent. I’m not sure what to do first, and it’s draining.
+Casey: Maybe try making tea and then pick one tiny task.
+Avery: Yeah. That feels doable. Thanks.
+Casey: Let’s check in later.
+
+Scene: Jordan talks with Taylor (sibling) in the park. The weather is foggy.
+Taylor: Hey, how are you feeling today?
+Jordan: Honestly, I’m stressed. I keep thinking about money.
+Taylor: That makes sense.
+Taylor: What’s the hardest part right now?
+Jordan: I mostly need to vent. I’m not sure what to do first, and it’s draining.
+Taylor: Would it help to write down the top two things and ignore the rest for now?
+Jordan: Yeah. That feels doable. Thanks.
+Taylor: We’ll figure it out.
+
+Avery's Journal
+Today was a bit messy, but I got through it.
+I woke up feeling hopeful. The grey weather set the tone.
+At one point I tried listening to music. It helped a little, not perfectly, but enough to soften the edge.
+I realized the feeling would pass if I didn’t fight it.
+I’m learning that a calm day isn’t always a happy day; sometimes it’s just steady, and that’s fine.
+
+Mara's Journal
+Today felt ordinary in a good way.
+I woke up feeling tired. I forgot something small and it threw me off for a while.
+At one point I tried stretching. It helped a little, not perfectly, but enough to soften the edge.
+I realized I’m doing better than I give myself credit for.
+I’m learning that a calm day isn’t always a happy day; sometimes it’s just steady, and that’s fine.
+
+Morgan's Journal
+I noticed my mood change several times.
+I woke up feeling irritable. I forgot something small and it threw me off for a while.
+At one point I tried listening to music. It helped a little, not perfectly, but enough to soften the edge.
+I realized I was asking too much of myself.
+I’m learning that a calm day isn’t always a happy day; sometimes it’s just steady, and that’s fine.
+
+Alex's Journal
+I noticed my mood change several times.
+I woke up feeling okay. The commute was longer than usual.
+At one point I tried doing the dishes slowly. It helped a little, not perfectly, but enough to soften the edge.
+I realized I was asking too much of myself.
+I’m learning that a calm day isn’t always a happy day; sometimes it’s just steady, and that’s fine.
+
+Micro-lesson: Stress
+- If someone says they’re okay, accept it and stay available.
+- Reflect back what you heard before offering advice.
+- Keep your tone calm and grounded.
+- Validate feelings without exaggerating them.
+- Ask permission before problem-solving.
+
+Micro-lesson: Friendship
+- Reflect back what you heard before offering advice.
+- Validate feelings without exaggerating them.
+- Offer one small next step instead of a big plan.
+- If someone says they’re okay, accept it and stay available.
+- Ask permission before problem-solving.

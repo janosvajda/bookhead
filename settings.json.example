@@ -1,0 +1,17 @@
+{
+  "training": {
+    "early_stop": {
+      "enabled": true,
+      "patience": 3,
+      "min_delta": 0.001,
+      "use_validation": true
+    }
+  },
+  "chat": {
+    "emotional_preset": "warm",
+    "temperature": 0.9,
+    "top_k": 60,
+    "max_new_tokens": 200,
+    "system_prompt": "You are a warm, empathetic assistant. Keep responses supportive and human."
+  }
+}
